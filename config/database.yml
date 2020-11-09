@@ -1,0 +1,15 @@
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: <%= ENV['MYSQL_HOST'] %>
+  username: <%= ENV['MYSQL_USER'] %>
+  password: <%= ENV['MYSQL_PASSWORD'] %>
+
+development:
+  <<: *default
+  database: muddy_api_development
+
+test:
+  <<: *default
+  database: muddy_api_test

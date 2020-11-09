@@ -1,0 +1,82 @@
+AllCops:
+  NewCops: enable
+
+Layout/IndentationWidth:
+  Width: 2
+
+Layout/BeginEndAlignment: # (new in 0.91)
+  Enabled: true
+
+Layout/EmptyLinesAroundAttributeAccessor: # (new in 0.83)
+  Enabled: true
+
+Layout/HashAlignment:
+  Enabled: true
+  EnforcedColonStyle: table
+
+Layout/TrailingWhitespace:
+  Enabled: false
+
+Layout/SpaceAroundMethodCallOperator: # (new in 0.82)
+  Enabled: true
+
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: true
+
+Lint/BinaryOperatorWithIdenticalOperands: # (new in 0.89)
+  Enabled: true
+
+Lint/ConstantDefinitionInBlock: # (new in 0.91)
+  Enabled: true
+
+Lint/DeprecatedOpenSSLConstant: # (new in 0.84)
+  Enabled: true
+
+Lint/DuplicateElsifCondition: # (new in 0.88)
+  Enabled: true
+
+Lint/DuplicateRequire: # (new in 0.90)
+  Enabled: true
+
+Lint/DuplicateRescueException: # (new in 0.89)
+  Enabled: true
+
+Lint/EmptyConditionalBody: # (new in 0.89)
+  Enabled: true
+
+Lint/EmptyFile: # (new in 0.90)
+  Enabled: true
+
+Lint/FloatComparison: # (new in 0.89)
+  Enabled: true
+
+Lint/Loop:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 15
+  Enabled: true
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/ClassLength:
+  Max: 150
+
+Naming/PredicateName:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
+Style/FormatString:
+  Enabled: false

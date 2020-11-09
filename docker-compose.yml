@@ -1,0 +1,27 @@
+version: "3"
+
+volumes:
+  mud-db-data:
+    external: false
+  mud-gems:
+    external: false
+
+services:
+  db:
+    image: mysql:5.7.32
+    env_file: .env
+    volumes:
+      - mud-db-data:/var/lib/postgresql/db-data
+    ports:
+      - 3308:3306
+
+  app:
+    build: .
+    env_file: .env
+    volumes:
+      - .:/usr/src/app
+      - mud-gems:/usr/src/gems
+    ports:
+      - 4050:4050
+    depends_on:
+      - db
