@@ -19,13 +19,13 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   config.include FactoryBot::Syntax::Methods
 
+  config.before(:each, type: :request) do
+    host! ENV['RAILS_TEST_DOMAIN']
+  end
+
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
-  end
-
-  config.before(:each, type: :request) do
-    host! 'test.domain'
   end
 
   config.around(:each) do |example|
