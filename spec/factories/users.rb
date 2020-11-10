@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :user do
+    profile
     firstname { 'Test' }
     lastname { 'McTestersons' }
     status { :active }
@@ -9,6 +10,8 @@ FactoryBot.define do
     sequence :email do |n|
       "person#{n}@example.com"
     end
+
+    password { 'password123' }
 
     # after(:build) do |user|
     #   user.class.skip_callback(:create, :before, :set_default_status, raise: false)
