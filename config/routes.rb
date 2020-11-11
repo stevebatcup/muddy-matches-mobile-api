@@ -5,4 +5,5 @@ Rails.application.routes.draw do
   resources :favourites
   get 'fans', to: 'favourites#index', as: :fans, fans: true
   get 'mutuals', to: 'favourites#index', as: :mutuals, mutuals: true
+  delete 'favourited/:id', to: 'favourites#destroy', as: :delete_favourited, favourited: true
 end

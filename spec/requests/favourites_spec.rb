@@ -13,6 +13,7 @@ RSpec.describe 'Favourites', type: :request do
     it 'lists the favourites for a signed in user' do
       build_favourites
       sign_in(@current_user.email, 'a_password')
+
       get favourites_path, headers: json_headers
 
       expect(response).to have_http_status(200)
@@ -25,6 +26,7 @@ RSpec.describe 'Favourites', type: :request do
     it 'lists the fans for a signed in user' do
       build_favourites
       sign_in(@current_user.email, 'a_password')
+
       get fans_path, headers: json_headers
 
       expect(response).to have_http_status(200)
@@ -37,6 +39,7 @@ RSpec.describe 'Favourites', type: :request do
     it 'lists the profiles who are both favourites AND fans for a signed in user as mutuals' do
       build_mutuals
       sign_in(@current_user.email, 'a_password')
+
       get mutuals_path(page: 1, per_page: 10), headers: json_headers
 
       expect(response).to have_http_status(200)
@@ -47,10 +50,13 @@ RSpec.describe 'Favourites', type: :request do
     end
 
     describe 'paginate the mutual listings' do
+      before :each do
+        sign_in(@current_user.email, 'a_password')
+      end
+
       context 'page 1' do
         it 'lists the mutuals for page 1' do
           build_mutuals
-          sign_in(@current_user.email, 'a_password')
 
           get mutuals_path(page: 1, per_page: 1), headers: json_headers
 
@@ -62,7 +68,6 @@ RSpec.describe 'Favourites', type: :request do
       context 'page 2' do
         it 'lists the mutuals for page 2' do
           build_mutuals
-          sign_in(@current_user.email, 'a_password')
 
           get mutuals_path(page: 2, per_page: 1), headers: json_headers
 
@@ -74,15 +79,107 @@ RSpec.describe 'Favourites', type: :request do
   end
 
   describe 'POST /favourites' do
-    xit 'adds a favourite' do
+    before :each do
+      sign_in(@current_user.email, 'a_password')
+    end
+
+    it 'adds a favourite' do
+      user = create(:user, firstname: 'mike')
+
+      post favourites_path, params: { id: user.id }, headers: json_headers
+
+      expect(response).to have_http_status(200)
+      expect(json_response['status']).to eq 'success'
+    end
+
+    it 'does not add a favourite that already exists' do
+      user = create(:user, firstname: 'mike')
+
+      post favourites_path, params: { id: user.id }, headers: json_headers
+      expect(json_response['status']).to eq 'success'
+
+      post favourites_path, params: { id: user.id }, headers: json_headers
+      expect(json_response['status']).to eq 'fail'
+    end
+
+    it 'raises an error when a bad user id is passed' do
+      expect do
+        post favourites_path, params: { id: '789789' }, headers: json_headers
+      end.to raise_exception(ActiveRecord::RecordNotFound)
     end
   end
 
   describe 'DELETE /favourites' do
-    xit 'deletes a favourite for the fave adder' do
+    before :each do
+      @matt = create(:user, firstname: 'matt', email: 'matt@foo.com', password: 'matts_password')
     end
 
-    xit 'deletes a favourite for the fave receiver' do
+    context 'current user deletes' do
+      before :each do
+        @current_user.add_favourite(@matt)
+        @fave_id = @current_user.reload.profile.favouritisations.last.id
+        sign_in(@current_user.email, 'a_password')
+      end
+
+      it 'deletes a favourite' do
+        delete favourite_path(@fave_id)
+
+        expect(response).to have_http_status(200)
+        expect(json_response['status']).to eq 'success'
+      end
+
+      it 'does not delete a favourite that has already been deleted' do
+        delete favourite_path(@fave_id)
+        delete favourite_path(@fave_id)
+
+        expect(json_response['status']).to eq 'fail'
+      end
+
+      it 'does not delete a favourite that does not exist' do
+        expect do
+          delete favourite_path('789789'), headers: json_headers
+        end.to raise_exception(ActiveRecord::RecordNotFound)
+      end
+
+      it 'cannot update the favourited status (delete as the favourited)' do
+        delete delete_favourited_path(@fave_id)
+
+        expect(json_response['status']).to eq 'fail'
+      end
+    end
+
+    context 'favourited user deletes' do
+      before :each do
+        @current_user.add_favourite(@matt)
+        @fave_id = @current_user.reload.profile.favouritisations.last.id
+        sign_in(@matt.email, 'matts_password')
+      end
+
+      it 'deletes a favourite' do
+        delete delete_favourited_path(@fave_id)
+
+        expect(response).to have_http_status(200)
+        expect(json_response['status']).to eq 'success'
+      end
+
+      it 'does not delete a favourite that has already been deleted' do
+        delete delete_favourited_path(@fave_id)
+        delete delete_favourited_path(@fave_id)
+
+        expect(json_response['status']).to eq 'fail'
+      end
+
+      it 'does not delete a favourite that does not exist' do
+        expect do
+          delete favourite_path('789789'), headers: json_headers
+        end.to raise_exception(ActiveRecord::RecordNotFound)
+      end
+
+      it 'cannot update the favouriter status (delete as the favouriter)' do
+        delete favourite_path(@fave_id)
+
+        expect(json_response['status']).to eq 'fail'
+      end
     end
   end
 
