@@ -192,13 +192,13 @@ RSpec.describe 'Favourites', type: :request do
   def build_favourites
     %w[sam james dave jon ian].each do |fave|
       user = create(:user, firstname: fave)
-      profile = create(:profile, user: user)
+      profile = create(:approved_profile, user: user)
       @current_profile.favourite_profiles << profile
     end
 
     %w[bob albert fred].each do |non_fave|
       user = create(:user, firstname: non_fave)
-      create(:profile, user: user)
+      create(:approved_profile, user: user)
       user.add_favourite(@current_user)
     end
   end
@@ -206,20 +206,20 @@ RSpec.describe 'Favourites', type: :request do
   def build_mutuals
     %w[greta helga ingrid].each do |mutual|
       user = create(:user, firstname: mutual)
-      profile = create(:profile, user: user)
-      @current_profile.favourite_profiles << profile
-      profile.favourite_profiles << @current_profile
+      profile = create(:approved_profile, user: user)
+      @current_user.profile.favourite_profiles << profile
+      profile.favourite_profiles << @current_user.profile
     end
 
     %w[liz elaine betty].each do |non_mutual_fan|
       user = create(:user, firstname: non_mutual_fan)
-      create(:profile, user: user)
+      create(:approved_profile, user: user)
       user.add_favourite(@current_user)
     end
 
     %w[corrina paula sheila].each do |non_mutual_fave|
       user = create(:user, firstname: non_mutual_fave)
-      create(:profile, user: user)
+      create(:approved_profile, user: user)
       @current_user.add_favourite(user)
     end
   end

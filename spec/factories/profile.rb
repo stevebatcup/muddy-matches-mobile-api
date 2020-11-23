@@ -4,12 +4,17 @@ FactoryBot.define do
       n
     end
 
-    publish_status { :approved }
+    factory :approved_profile do
+      publish_status { :approved }
+      profile_status { :approved }
+    end
+
     visibility_status { :visible }
     created { 1.year.ago }
     stamp { 1.month.ago }
-    profile_status { :approved }
     user { association :user, profile: instance }
     favourite_profiles { [] }
+    gender { 'female' }
+    dating_looking_for { 'male' }
   end
 end

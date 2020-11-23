@@ -3,9 +3,7 @@ require 'rails_helper'
 RSpec.describe Favourite, type: :model do
   before :all do
     @user1 = create(:user, email: 'user1@bar.com', password: 'a_password', firstname: 'Steve')
-    create(:profile, user: @user1)
     @user2 = create(:user, email: 'user2@bar.com', password: 'a_password', firstname: 'James')
-    create(:profile, user: @user2)
   end
 
   it 'cannot be duplicated' do

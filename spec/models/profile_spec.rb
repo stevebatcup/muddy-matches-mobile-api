@@ -1,14 +1,14 @@
 require 'rails_helper'
 
-RSpec.describe User, type: :model do
+RSpec.describe Profile, type: :model do
   before :all do
     @current_user = create(:user, email: 'nillo@bar.com', password: 'password')
-    @current_profile = create(:profile, user: @current_user)
+    @current_profile = create(:approved_profile, user: @current_user)
   end
 
   it 'adds a favourite' do
     second_user = create(:user, email: 'django@bar.com', password: 'password')
-    second_profile = create(:profile, user: second_user)
+    second_profile = create(:approved_profile, user: second_user)
 
     @current_user.add_favourite(second_user)
 
@@ -20,10 +20,10 @@ RSpec.describe User, type: :model do
 
   it 'only finds active users with approved profiles' do
     inactive_user = create(:user, email: 'bad@bar.com', password: 'password', status: :deleted)
-    create(:profile, user: inactive_user)
+    create(:approved_profile, user: inactive_user)
 
     unapproved_user = create(:user, email: 'nasty@bar.com', password: 'password')
-    create(:profile, user: unapproved_user, publish_status: :new)
+    create(:profile, user: unapproved_user)
 
     profiles = Profile.approved
 
@@ -86,6 +86,61 @@ RSpec.describe User, type: :model do
       expect(unblocked_profiles).to include @second_user.profile
       expect(unblocked_profiles).to_not include @user_to_block.profile
       expect(unblocked_profiles).to_not include @user_blocking.profile
+    end
+
+    it 'grabs the approved display name from the text fields' do
+      user = create(:user, email: 'test@bar.com', password: 'password')
+      profile = create(:profile, user: user)
+
+      create(:profile_text, type: 'display_name', content: 'MaryB', profile: profile)
+
+      expect(profile.text_display_name).to eq 'MaryB'
+    end
+
+    it 'does not grab a disapproved display name from the text fields' do
+      user = build_stubbed(:user, email: 'test2@bar.com', password: 'password')
+      profile = build_stubbed(:profile, user: user)
+
+      create(:profile_text, type: 'display_name', content: 'Jammer', profile: profile, status: :rejected)
+
+      expect(profile.text_display_name).to be_nil
+
+      create(:profile_text, type: 'display_name', content: 'Billy', profile: profile, status: :approved)
+
+      expect(profile.text_display_name).to eq 'Billy'
+    end
+  end
+
+  it 'sets the default display name text' do
+    user = build_stubbed(:user, email: 'ian@foo.com', password: 'password', firstname: 'ian', lastname: 'foo')
+    user.profile.set_default_display_name
+
+    expect(user.profile.text_display_name).to eq 'ian foo'
+  end
+
+  it 'sets the missing default profile data' do
+    profile = create(:profile)
+
+    expect(profile.dating).to eq 'yes'
+    expect(profile.profile_status).to eq 'new'
+    expect(profile.publish_status).to eq 'new'
+  end
+
+  context 'validation' do
+    it 'must have a gender' do
+      profile = build_stubbed(:profile, gender: nil)
+      profile.valid?
+
+      expect(profile.errors).to_not be_empty
+      expect(profile.errors['gender']).to include 'can\'t be blank'
+    end
+
+    it 'must have a seeking gender' do
+      profile = build_stubbed(:profile, dating_looking_for: nil)
+      profile.valid?
+
+      expect(profile.errors).to_not be_empty
+      expect(profile.errors['dating_looking_for']).to include 'can\'t be blank'
     end
   end
 end

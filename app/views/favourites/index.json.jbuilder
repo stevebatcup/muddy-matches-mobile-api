@@ -1,6 +1,6 @@
 json.mode @mode
 
-if @profiles.any?
+if @profiles&.any?
   json.profiles @profiles do |profile|
     user = profile.user
     json.gender profile.gender

@@ -55,6 +55,7 @@ RSpec.describe 'Auth actions', type: :request do
       get favourites_path
 
       expect(response).to have_http_status(403)
+      expect(json_response['error']).to eq 'You must be signed in'
     end
 
     it 'denies access to a restricted resource for a user who has signed out' do
@@ -63,6 +64,7 @@ RSpec.describe 'Auth actions', type: :request do
       get favourites_path
 
       expect(response).to have_http_status(403)
+      expect(json_response['error']).to eq 'You must be signed in'
     end
   end
 end
