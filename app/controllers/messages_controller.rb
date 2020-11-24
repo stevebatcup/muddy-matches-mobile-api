@@ -6,11 +6,14 @@ class MessagesController < ApplicationController
 
   def show
     @message = Message.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { status: :fail, error: I18n.t('messaging.error.no_message') }, status: 500
   end
 
   def create
-    return render json: { error: I18n.t('messaging.cannot_send') }, status: 403 unless current_user.subscriber?
-    return raise ActiveRecord::RecordNotFound if recipient.nil?
+    return render json: { error: I18n.t('messaging.error.no_subscription') }, status: 403 unless current_user.subscriber?
+    return render json: { error: I18n.t('profile_not_ready') }, status: 403 unless current_user.profile.visible_and_approved?
+    return render json: { status: :fail, error: I18n.t('messaging.error.no_recipient') }, status: 500 if recipient.nil?
 
     @conversation = Conversation.find_or_build_between(current_user, recipient)
     @conversation.messages << new_message

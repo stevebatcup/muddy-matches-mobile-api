@@ -97,7 +97,7 @@ RSpec.describe 'Conversations', type: :request do
 
   def build_conversations
     meg = create(:user, email: 'meg@bar.com', password: 'a_password', firstname: 'Meg')
-    create(:profile, user: meg, gender: 'female')
+    create(:approved_profile, user: meg, gender: 'female')
     create(:profile_text, type: 'display_name', content: 'Meggy', profile: meg.profile)
     meg_msg = build(:message, body:                 'Oh my gosh!',
                               sender_profile_id:    meg.profile.id,
@@ -110,7 +110,7 @@ RSpec.describe 'Conversations', type: :request do
            messages:     [meg_msg])
 
     janet = create(:user, email: 'janet@bar.com', password: 'a_password', firstname: 'Janet')
-    create(:profile, user: janet, gender: 'female')
+    create(:approved_profile, user: janet, gender: 'female')
     create(:profile_text, type: 'display_name', content: 'Janjanjan', profile: janet.profile)
     janet_msg = build(:message, body:                 'Holy Mackerel',
                                 sender_profile_id:    janet.profile.id,

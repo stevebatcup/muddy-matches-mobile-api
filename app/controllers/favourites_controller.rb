@@ -19,14 +19,20 @@ class FavouritesController < ApplicationController
   end
 
   def create
-    user = User.find(params[:id])
-    current_user.add_favourite(user)
+    return render json: { error: I18n.t('profile_not_ready') }, status: 403 unless current_user.profile.visible_and_approved?
 
-    if current_user.profile.errors.any?
-      error_msg = current_user.profile.favouritisations.last.errors.full_messages
-      render json: { status: :fail, error: error_msg }
-    else
-      render json: { status: :success }
+    begin
+      user = User.find(params[:id])
+      current_user.add_favourite(user)
+
+      if current_user.profile.errors.any?
+        error_msg = current_user.profile.favouritisations.last.errors.full_messages
+        render json: { status: :fail, error: error_msg }
+      else
+        render json: { status: :success }
+      end
+    rescue ActiveRecord::RecordNotFound
+      render json: { status: :fail, error: I18n.t('favourites.error.user_not_found') }, status: 500
     end
   end
 
@@ -39,6 +45,8 @@ class FavouritesController < ApplicationController
     else
       render json: { status: :fail }
     end
+  rescue ActiveRecord::RecordNotFound
+    render json: { status: :fail, error: I18n.t('favourites.error.user_not_found') }, status: 500
   end
 
   private

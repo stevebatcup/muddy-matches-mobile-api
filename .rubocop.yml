@@ -4,6 +4,10 @@ AllCops:
 Layout/IndentationWidth:
   Width: 2
 
+Layout/LineLength:
+  Max: 150
+  AutoCorrect: false
+
 Layout/BeginEndAlignment: # (new in 0.91)
   Enabled: true
 
@@ -63,14 +67,14 @@ Metrics/BlockLength:
   Enabled: false
 
 Metrics/MethodLength:
-  Max: 15
+  Max: 18
   Enabled: true
-
-Metrics/AbcSize:
-  Enabled: false
 
 Metrics/ClassLength:
   Max: 150
+
+Metrics/AbcSize:
+  Enabled: false
 
 Naming/PredicateName:
   Enabled: false

@@ -5,6 +5,7 @@ RSpec.describe 'Messages', type: :request do
 
   before :all do
     @current_user = create(:subscribing_user, email: 'sender@foo.com', password: 'a_password', firstname: 'Steve')
+    create(:approved_profile, user: @current_user)
     @recipient = create(:user, email: 'recipient@foo.com', password: 'a_password', firstname: 'Miranda')
 
     @msg = build(:message, body:                 'Holy Mackerel',
@@ -24,9 +25,10 @@ RSpec.describe 'Messages', type: :request do
     it 'raises an error when trying to send a message to a user who does not exist' do
       bad_message = { body: 'A message body blah blah', recipient_profile_id: '123_456' }
 
-      expect do
-        post messages_path, params: bad_message, headers: json_headers
-      end.to raise_exception(ActiveRecord::RecordNotFound)
+      post messages_path, params: bad_message, headers: json_headers
+      expect(response).to have_http_status(500)
+      expect(json_response['status']).to eq 'fail'
+      expect(json_response['error']).to eq 'That member does not exist'
     end
 
     it 'sends a message' do
@@ -39,9 +41,11 @@ RSpec.describe 'Messages', type: :request do
     end
 
     it 'raises an error when trying to view a non-existent message' do
-      expect do
-        get message_path(123), headers: json_headers
-      end.to raise_exception(ActiveRecord::RecordNotFound)
+      get message_path(123), headers: json_headers
+
+      expect(response).to have_http_status(500)
+      expect(json_response['status']).to eq 'fail'
+      expect(json_response['error']).to eq 'That message does not exist'
     end
 
     it 'shows a message' do
@@ -66,6 +70,19 @@ RSpec.describe 'Messages', type: :request do
 
       expect(response).to have_http_status(403)
       expect(json_response['error']).to eq 'You must be signed in'
+    end
+  end
+
+  context 'when profile not ready' do
+    it 'does not send a message and sends back an error if profile is not ready' do
+      lazy_user = create(:subscribing_user, email: 'lazy@foo.com', password: 'a_password', firstname: 'Lazy')
+      create(:profile, visibility_status: 'hidden', user: lazy_user)
+      sign_in(lazy_user.email, 'a_password')
+
+      post messages_path, params: message_params, headers: json_headers
+
+      expect(response).to have_http_status(403)
+      expect(json_response['error']).to eq 'You must have a visible and approved profile'
     end
   end
 

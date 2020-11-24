@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::API
   def authorise_user!
-    return render json: { status: :unauthorised, error: 'You must be signed in' }, status: 403 unless user_signed_in?
+    return render json: { status: :unauthorised, error: I18n.t('requires_auth') }, status: 403 unless user_signed_in?
   end
 
   helper_method :current_user

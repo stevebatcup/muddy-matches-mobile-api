@@ -71,6 +71,10 @@ class Profile < ApplicationRecord
     end
   end
 
+  def visible_and_approved?
+    visibility_status == 'visible' && publish_status == 'approved'
+  end
+
   def add_favourite_profile(profile)
     favouritisations << Favourite.new({
                                         favourite_profile_id: profile.id,

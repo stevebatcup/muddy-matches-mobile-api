@@ -5,7 +5,7 @@ RSpec.describe 'Favourites', type: :request do
 
   before :all do
     @current_user = create(:user, email: 'john@bar.com', password: 'a_password', firstname: 'Steve')
-    @current_profile = create(:profile, user: @current_user)
+    @current_profile = create(:approved_profile, user: @current_user)
   end
 
   describe 'GET /favourites' do
@@ -101,10 +101,25 @@ RSpec.describe 'Favourites', type: :request do
       expect(json_response['status']).to eq 'fail'
     end
 
+    it 'does not add a favourite and sends back an error if profile is not ready' do
+      sign_out
+      lazy_user = create(:subscribing_user, email: 'lazy@foo.com', password: 'a_password', firstname: 'Lazy')
+      create(:profile, publish_status: 'deleted', user: lazy_user)
+      sign_in(lazy_user.email, 'a_password')
+      user = create(:user)
+
+      post favourites_path, params: { id: user.id }, headers: json_headers
+
+      expect(response).to have_http_status(403)
+      expect(json_response['error']).to eq 'You must have a visible and approved profile'
+    end
+
     it 'raises an error when a bad user id is passed' do
-      expect do
-        post favourites_path, params: { id: '789789' }, headers: json_headers
-      end.to raise_exception(ActiveRecord::RecordNotFound)
+      post favourites_path, params: { id: '789789' }, headers: json_headers
+
+      expect(response).to have_http_status(500)
+      expect(json_response['status']).to eq 'fail'
+      expect(json_response['error']).to eq 'That member does not exist'
     end
   end
 
@@ -135,9 +150,11 @@ RSpec.describe 'Favourites', type: :request do
       end
 
       it 'does not delete a favourite that does not exist' do
-        expect do
-          delete favourite_path('789789'), headers: json_headers
-        end.to raise_exception(ActiveRecord::RecordNotFound)
+        delete favourite_path('789789'), headers: json_headers
+
+        expect(response).to have_http_status(500)
+        expect(json_response['status']).to eq 'fail'
+        expect(json_response['error']).to eq 'That member does not exist'
       end
 
       it 'cannot update the favourited status (delete as the favourited)' do
@@ -169,9 +186,11 @@ RSpec.describe 'Favourites', type: :request do
       end
 
       it 'does not delete a favourite that does not exist' do
-        expect do
-          delete favourite_path('789789'), headers: json_headers
-        end.to raise_exception(ActiveRecord::RecordNotFound)
+        delete favourite_path('789789'), headers: json_headers
+
+        expect(response).to have_http_status(500)
+        expect(json_response['status']).to eq 'fail'
+        expect(json_response['error']).to eq 'That member does not exist'
       end
 
       it 'cannot update the favouriter status (delete as the favouriter)' do
