@@ -1,8 +1,8 @@
 json.error @error if @error
 
-if @message
+if @new_message
   json.message do
-    json.body @message.body
+    json.body @new_message.body
   end
 end
 

@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'support/helpers'
 
 RSpec.describe 'Favourites', type: :request do
   include SpecHelpers

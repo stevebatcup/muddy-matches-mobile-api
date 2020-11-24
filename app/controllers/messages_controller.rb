@@ -1,4 +1,7 @@
 class MessagesController < ApplicationController
+  include ActionController::Helpers
+  helper MessagingHelper
+
   before_action :authorise_user!
 
   def show
@@ -6,17 +9,12 @@ class MessagesController < ApplicationController
   end
 
   def create
+    return render json: { error: I18n.t('messaging.cannot_send') }, status: 403 unless current_user.subscriber?
     return raise ActiveRecord::RecordNotFound if recipient.nil?
 
-    conversation = Conversation.find_or_build_between(current_user, recipient)
-    conversation.messages << new_message
-
-    if conversation.save
-      @message = new_message
-      @conversation = conversation
-    else
-      @error = 'foo'
-    end
+    @conversation = Conversation.find_or_build_between(current_user, recipient)
+    @conversation.messages << new_message
+    @conversation.save
   end
 
   private

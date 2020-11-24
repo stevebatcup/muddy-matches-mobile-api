@@ -13,6 +13,10 @@ FactoryBot.define do
 
     password { 'password123' }
 
+    factory :subscribing_user do
+      subscription_expires { 1.month.from_now }
+    end
+
     # after(:build) do |user|
     #   user.class.skip_callback(:create, :before, :set_default_status, raise: false)
     # end

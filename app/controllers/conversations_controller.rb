@@ -1,4 +1,7 @@
 class ConversationsController < ApplicationController
+  include ActionController::Helpers
+  helper MessagingHelper
+
   before_action :authorise_user!
 
   def index

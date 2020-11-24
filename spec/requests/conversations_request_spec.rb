@@ -1,17 +1,17 @@
 require 'rails_helper'
-require 'support/helpers'
 
 RSpec.describe 'Conversations', type: :request do
   include SpecHelpers
 
   before :all do
-    @current_user = create(:user, email: 'convo@bar.com', password: 'a_password', firstname: 'Steve')
+    @current_user = create(:subscribing_user, email: 'convo@bar.com', password: 'a_password', firstname: 'Steve')
     @current_profile = create(:profile, user: @current_user, gender: 'male')
     build_conversations
   end
 
   context 'when signed in' do
     before(:each) { sign_in(@current_user.email, 'a_password') }
+    after(:each) { sign_out }
 
     it 'lists conversations for the current_user' do
       get conversations_path, headers: json_headers
@@ -53,12 +53,31 @@ RSpec.describe 'Conversations', type: :request do
   end
 
   context 'when not subscribed' do
-    xit 'does not list conversations for a non-subscriber' do
+    before :all do
+      @non_sub_user = create(:user, email: 'cheapskate@bar.com', password: 'a_password', firstname: 'Cheapskate')
+
+      bella = create(:user, email: 'bella@bar.com', password: 'a_password', firstname: 'Bella', lastname: 'Mella')
+      create(:profile, user: bella, gender: 'female')
+      bella_msg = build(:message, body:                 'Oh my gosh!',
+                                  sender_profile_id:    bella.profile.id,
+                                  recipient_profile_id: @non_sub_user.profile.id)
+      create(:conversation,
+             profile_id_1: @non_sub_user.profile.id,
+             profile_id_2: bella.profile.id,
+             whos_turn:    bella.profile.id,
+             modified:     1.day.ago,
+             messages:     [bella_msg])
+    end
+
+    before(:each) { sign_in(@non_sub_user.email, 'a_password') }
+    after(:each) { sign_out }
+
+    it 'does not list conversations for a non-subscriber' do
       get conversations_path, headers: json_headers
 
-      expect(response).to have_http_status(403)
-      expect(conversations).to be_nil
-      expect(json_response['error']).to eq 'You must be a subscriber'
+      expect(response).to have_http_status(200)
+      expect(display_names).to include 'Bella Mella'
+      expect(conversations.first['lastMessage']['text']).to eq 'You must be a subscriber to read this message'
     end
   end
 

@@ -30,6 +30,9 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
+  messaging:
+    message_locked: You must be a subscriber to read this message
+    cannot_send: You must be a subscriber to send a message
   activerecord:
     user:
       errors:

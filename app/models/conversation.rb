@@ -1,6 +1,8 @@
 class Conversation < ApplicationRecord
   has_many :messages
+
   validates :messages, length: { minimum: 1, message: 'Must have at least one message' }
+
   before_save :set_missing_values
 
   class << self

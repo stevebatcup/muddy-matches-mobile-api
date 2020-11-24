@@ -14,4 +14,8 @@ module SpecHelpers
   def sign_in(email, password)
     post sign_in_path, params: { email: email, password: password }, headers: json_headers
   end
+
+  def sign_out
+    delete sign_out_path, headers: json_headers
+  end
 end

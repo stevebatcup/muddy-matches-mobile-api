@@ -55,6 +55,21 @@ class User < ApplicationRecord
     self.auth_token = random_token
   end
 
+  def subscriber?
+    return false if subscription_expires.nil?
+
+    subscription_expires >= Date.today
+  end
+
+  def setup_subscription(days)
+    expires = if subscription_expires.nil?
+                days.days.from_now
+              else
+                subscription_expires + days.days
+              end
+    update_attribute(:subscription_expires, expires)
+  end
+
   private
 
   def set_default_values

@@ -130,4 +130,17 @@ RSpec.describe User, type: :model do
       expect(@user.unseen_messages.last.body).to eq 'An ice breaking message'
     end
   end
+
+  it 'creates a subscription for a free member' do
+    @user.setup_subscription(30)
+
+    expect(@user.subscription_expires).to eq Date.today + 30.days
+  end
+
+  it 'extends a subscription for an existing subscriber' do
+    subscriber = create(:user, email: 'steve@bar.com', password: 'password', subscription_expires: Date.today + 24.days)
+    subscriber.setup_subscription(90)
+
+    expect(subscriber.subscription_expires).to eq Date.today + 114.days
+  end
 end

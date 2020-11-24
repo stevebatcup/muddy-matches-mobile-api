@@ -10,4 +10,6 @@ Rails.application.routes.draw do
 
   resources :conversations, only: :index
   resources :messages, only: %i[show create]
+
+  post 'subscribed', to: 'subscriptions#create', as: :subscribed
 end

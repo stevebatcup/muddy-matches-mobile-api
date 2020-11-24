@@ -17,15 +17,21 @@ class Message < ApplicationRecord
     end
   end
 
+  def update_conversation_last_message_id
+    conversation.update_attribute(:last_message_id, id)
+  end
+
+  def read?
+    read_on.present? && recipient_msg_read == 'yes'
+  end
+
+  private
+
   def set_default_attributes
     self.origin = 'mobile app'
     self.recipient_msg_read = 'no'
     self.message_type = 'standard'
     self.sender_msg_status = 'active'
     self.recipient_msg_status = 'active'
-  end
-
-  def update_conversation_last_message_id
-    conversation.update_attribute(:last_message_id, id)
   end
 end
