@@ -12,4 +12,7 @@ Rails.application.routes.draw do
   resources :messages, only: %i[show create]
 
   post 'subscribed', to: 'subscriptions#create', as: :subscribed
+  post 'search', to: 'search#index', as: :search
+  post 'approve-connect', to: 'connects#create', as: :approve_connect, mode: :approve
+  post 'reject-connect', to: 'connects#create', as: :reject_connect, mode: :reject
 end

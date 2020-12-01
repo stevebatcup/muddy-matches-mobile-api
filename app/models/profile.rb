@@ -7,6 +7,11 @@ class Profile < ApplicationRecord
 
   has_one :user
   has_many :profile_texts
+  has_many :photos
+  belongs_to :town, optional: true
+  belongs_to :county, optional: true
+  belongs_to :marital_status, optional: true
+  belongs_to :body_type, optional: true
 
   before_create :set_default_data
   after_create :set_default_display_name
@@ -39,8 +44,24 @@ class Profile < ApplicationRecord
   has_many :blocking_profiles, through: :blockings, source: :profile
 
   class << self
+    def connects_for_user(current_user, params)
+      joins(:user)
+        .joins(:photos)
+        .where(gender: current_user.profile.dating_looking_for)
+        .where(dating_looking_for: current_user.profile.gender)
+        .where("birth_date <= DATE_SUB(CURDATE(), INTERVAL #{params[:age_min]} YEAR)")
+        .where("birth_date >= DATE_SUB(CURDATE(), INTERVAL #{params[:age_max]} YEAR)")
+        .where(publish_status: 'approved')
+        .where(dating: 'yes')
+        .where(users: { status: 'active' })
+        .where.not(photos: [nil])
+        .where.not(profile_id: current_user.profile.favourite_profiles.map(&:profile_id))
+        .where.not(profile_id: current_user.connect_decisions.map(&:connect_profile_id))
+        .order('users.created': :desc)
+    end
+
     def build_default(params)
-      new(dating_looking_for: params[:dating_looking_for], gender: params[:gender])
+      new(dating_looking_for: params[:dating_looking_for], gender: params[:gender], dating: 'yes')
     end
 
     def approved
@@ -69,6 +90,14 @@ class Profile < ApplicationRecord
     def timestamp_attributes_for_update
       super << 'stamp'
     end
+  end
+
+  def main_photo
+    photos.find_by(status: :approved, photo_type: :main)
+  end
+
+  def age
+    (Date.today - birth_date).to_i / 365
   end
 
   def visible_and_approved?
@@ -118,7 +147,7 @@ class Profile < ApplicationRecord
   private
 
   def set_default_data
-    self.dating = 'yes'
+    self.dating = 'yes' if dating.nil?
     self.profile_status = 'new' if profile_status.nil?
     self.publish_status = 'new' if publish_status.nil?
   end

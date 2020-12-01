@@ -1,7 +1,9 @@
 class User < ApplicationRecord
-  belongs_to :profile
   validates_presence_of :firstname, :lastname, :password, :email
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
+
+  belongs_to :profile
+  has_many :connect_decisions
 
   before_create :set_default_values
   validate :check_email_blacklist
@@ -68,6 +70,32 @@ class User < ApplicationRecord
                 subscription_expires + days.days
               end
     update_attribute(:subscription_expires, expires)
+  end
+
+  def approve_connect(profile)
+    return unless profile
+
+    connect_decisions.create(
+      connect_profile_id: profile.id,
+      decision:           'yes'
+    )
+  end
+
+  def reject_connect(profile)
+    return unless profile
+
+    connect_decisions.create(
+      connect_profile_id: profile.id,
+      decision:           'no'
+    )
+  end
+
+  def approved_connects
+    connect_decisions.where(decision: 'yes')
+  end
+
+  def rejected_connects
+    connect_decisions.where(decision: 'no')
   end
 
   private

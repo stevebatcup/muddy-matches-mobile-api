@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe User, type: :model do
+RSpec.fdescribe User, type: :model do
   before :all do
     @user = create(:user, email: 'steve@bar.com', password: 'password')
   end
@@ -142,5 +142,35 @@ RSpec.describe User, type: :model do
     subscriber.setup_subscription(90)
 
     expect(subscriber.subscription_expires).to eq Date.today + 114.days
+  end
+
+  it 'approves a connect profile' do
+    nice_user = create(:user, email: 'nice@bar.com', password: 'password')
+    create(:approved_profile, user: nice_user)
+
+    @user.approve_connect(nice_user.profile)
+
+    expect(@user.approved_connects.map(&:profile)).to include nice_user.profile
+  end
+
+  it 'does not approve a non-existent connect profile' do
+    actual = @user.approve_connect(nil)
+
+    expect(actual).to be_nil
+  end
+
+  it 'rejects a connect profile' do
+    nice_user = create(:user, email: 'nasty@bar.com', password: 'password')
+    create(:approved_profile, user: nice_user)
+
+    @user.reject_connect(nice_user.profile)
+
+    expect(@user.rejected_connects.map(&:profile)).to include nice_user.profile
+  end
+
+  it 'does not reject a non-existent connect profile' do
+    actual = @user.reject_connect(nil)
+
+    expect(actual).to be_nil
   end
 end

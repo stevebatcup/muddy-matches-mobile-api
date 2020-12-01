@@ -16,5 +16,6 @@ FactoryBot.define do
     favourite_profiles { [] }
     gender { 'female' }
     dating_looking_for { 'male' }
+    dating { 'yes' }
   end
 end
