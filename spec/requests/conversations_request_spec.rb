@@ -24,7 +24,7 @@ RSpec.describe 'Conversations', type: :request do
     it 'shows the most recently updated conversation first' do
       get conversations_path, headers: json_headers
 
-      expect(conversations.first['displayName']).to eq 'Meggy'
+      expect(conversations.first['converser']['displayName']).to eq 'Meggy'
     end
 
     it 'shows an excerpt of the most recent message in the conversation' do
@@ -37,8 +37,28 @@ RSpec.describe 'Conversations', type: :request do
       get conversations_path(page: 2, per_page: 1), headers: json_headers
 
       expect(conversations.length).to eq 1
-      expect(conversations.first['displayName']).to eq 'Janjanjan'
+      expect(conversations.first['converser']['displayName']).to eq 'Janjanjan'
       expect(conversations.first['lastMessage']['text']).to eq 'Holy Mackerel'
+    end
+
+    it 'does not show the conversation data for a conversation that does not exist' do
+      get conversation_path(123), headers: json_headers
+
+      expect(response).to have_http_status(500)
+      expect(json_response['error']).to eq 'That conversation does not exist'
+    end
+
+    it 'shows the conversation data' do
+      build_detailed_conversation
+
+      get conversation_path(@detailed_conversation), headers: json_headers
+
+      expect(response).to have_http_status(200)
+      expect(json_response['messages'].length).to eq 3
+      expect(json_response['messages'][0]['sender']['displayName']).to eq 'Catalina Dietrich'
+      expect(json_response['messages'][0]['body']).to eq 'Man this is cheesy!'
+      expect(json_response['messages'][1]['sentAt']).to eq 2.days.ago.strftime('%b %d, %Y')
+      expect(json_response['messages'][2]['recipient']['displayName']).to eq @current_user.profile.text_display_name
     end
   end
 
@@ -88,11 +108,11 @@ RSpec.describe 'Conversations', type: :request do
   end
 
   def display_names
-    conversations.map { |c| c['displayName'] }
+    conversations.map { |c| c['converser']['displayName'] }
   end
 
   def genders
-    conversations.map { |c| c['gender'] }
+    conversations.map { |c| c['converser']['gender'] }
   end
 
   def build_conversations
@@ -122,5 +142,32 @@ RSpec.describe 'Conversations', type: :request do
            whos_turn:       @current_user.profile.id,
            modified:        1.week.ago,
            messages:        [janet_msg])
+  end
+
+  def build_detailed_conversation
+    catalina = create(:user,
+                      email:     'catalina@bar.com',
+                      password:  'a_password',
+                      firstname: 'Catalina',
+                      lastname:  'Dietrich')
+    create(:approved_profile, user: catalina, gender: 'female')
+    msg1 = build(:message, body:                 'Hey there handsome!',
+                           sender_profile_id:    catalina.profile.id,
+                           recipient_profile_id: @current_user.profile.id,
+                           sent:                 3.days.ago)
+    msg2 = build(:message, body:                 'Hey yourself hotty!',
+                           sender_profile_id:    @current_user.profile.id,
+                           recipient_profile_id: catalina.profile.id,
+                           sent:                 2.days.ago)
+    msg3 = build(:message, body:                 'Man this is cheesy!',
+                           sender_profile_id:    catalina.profile.id,
+                           recipient_profile_id: @current_user.profile.id,
+                           sent:                 1.day.ago)
+    @detailed_conversation = create(:conversation,
+                                    profile_id_1: @current_user.profile.id,
+                                    profile_id_2: catalina.profile.id,
+                                    whos_turn:    catalina.profile.id,
+                                    modified:     1.day.ago,
+                                    messages:     [msg1, msg2, msg3])
   end
 end

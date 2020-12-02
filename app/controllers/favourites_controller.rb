@@ -1,4 +1,7 @@
 class FavouritesController < ApplicationController
+  include ActionController::Helpers
+  helper ProfileHelper
+
   before_action :authorise_user!
 
   def index
@@ -19,7 +22,8 @@ class FavouritesController < ApplicationController
   end
 
   def create
-    return render json: { error: I18n.t('profile_not_ready') }, status: 403 unless current_user.profile.visible_and_approved?
+    return render json: { status: :fail, error: I18n.t('profile_not_ready') }, status: 403 unless current_user.profile.visible_and_approved?
+    return render json: { status: :fail, error: I18n.t('favourites.error.cannot_add_self') }, status: 500 if params[:id].to_i == current_user.id
 
     begin
       user = User.find(params[:id])
@@ -43,10 +47,10 @@ class FavouritesController < ApplicationController
     if delete_result
       render json: { status: :success }
     else
-      render json: { status: :fail }
+      render json: { status: :fail, mode: params[:favourited].present? ? 'favourited' : 'favouriter' }
     end
   rescue ActiveRecord::RecordNotFound
-    render json: { status: :fail, error: I18n.t('favourites.error.user_not_found') }, status: 500
+    render json: { status: :fail, error: I18n.t('favourites.error.favourite_not_found') }, status: 500
   end
 
   private

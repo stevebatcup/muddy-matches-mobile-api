@@ -9,5 +9,5 @@ RSpec.configure do |config|
 
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
-  config.filter_run focus: true
+  # config.filter_run focus: true
 end

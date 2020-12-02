@@ -38,9 +38,13 @@ en:
   favourites:
     error:
       user_not_found: That member does not exist
+      favourite_not_found: Favourite not found
+      already_added: Favourite already added
+      cannot_add_self: You cannot add yourself as a favourite
   messaging:
     message_locked: You must be a subscriber to read this message
     error:
+      no_conversation: That conversation does not exist
       no_subscription: You must be a subscriber to send a message
       no_recipient: That member does not exist
       no_message: That message does not exist

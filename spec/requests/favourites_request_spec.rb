@@ -16,8 +16,8 @@ RSpec.describe 'Favourites', type: :request do
       get favourites_path, headers: json_headers
 
       expect(response).to have_http_status(200)
-      expect(firstnames).to include 'sam'
-      expect(firstnames).to_not include 'bob'
+      expect(display_names).to include 'sam'
+      expect(display_names).to_not include 'bob'
     end
   end
 
@@ -29,8 +29,8 @@ RSpec.describe 'Favourites', type: :request do
       get fans_path, headers: json_headers
 
       expect(response).to have_http_status(200)
-      expect(firstnames).to include 'albert'
-      expect(firstnames).to_not include 'dave'
+      expect(display_names).to include 'albert'
+      expect(display_names).to_not include 'dave'
     end
   end
 
@@ -42,10 +42,10 @@ RSpec.describe 'Favourites', type: :request do
       get mutuals_path(page: 1, per_page: 10), headers: json_headers
 
       expect(response).to have_http_status(200)
-      expect(firstnames).to include 'greta'
-      expect(firstnames).to include 'helga'
-      expect(firstnames).to_not include 'liz'
-      expect(firstnames).to_not include 'paula'
+      expect(display_names).to include 'greta'
+      expect(display_names).to include 'helga'
+      expect(display_names).to_not include 'liz'
+      expect(display_names).to_not include 'paula'
     end
 
     describe 'paginate the mutual listings' do
@@ -59,8 +59,8 @@ RSpec.describe 'Favourites', type: :request do
 
           get mutuals_path(page: 1, per_page: 1), headers: json_headers
 
-          expect(firstnames).to include 'greta'
-          expect(firstnames).to_not include 'helga'
+          expect(display_names).to include 'greta'
+          expect(display_names).to_not include 'helga'
         end
       end
 
@@ -70,8 +70,8 @@ RSpec.describe 'Favourites', type: :request do
 
           get mutuals_path(page: 2, per_page: 1), headers: json_headers
 
-          expect(firstnames).to include 'helga'
-          expect(firstnames).to_not include 'greta'
+          expect(display_names).to include 'helga'
+          expect(display_names).to_not include 'greta'
         end
       end
     end
@@ -203,8 +203,8 @@ RSpec.describe 'Favourites', type: :request do
 
   private
 
-  def firstnames
-    json_response['profiles'].map { |f| f['firstname'] } if json_response['profiles'].present?
+  def display_names
+    json_response['profiles'].map { |f| f['displayName'] } if json_response['profiles'].present?
   end
 
   def build_favourites

@@ -8,11 +8,12 @@ Rails.application.routes.draw do
   get 'mutuals', to: 'favourites#index', as: :mutuals, mutuals: true
   delete 'favourited/:id', to: 'favourites#destroy', as: :delete_favourited, favourited: true
 
-  resources :conversations, only: :index
+  resources :conversations, only: %i[index show]
   resources :messages, only: %i[show create]
 
   post 'subscribed', to: 'subscriptions#create', as: :subscribed
   post 'search', to: 'search#index', as: :search
+  post 'connect', to: 'search#index'
   post 'approve-connect', to: 'connects#create', as: :approve_connect, mode: :approve
   post 'reject-connect', to: 'connects#create', as: :reject_connect, mode: :reject
 end

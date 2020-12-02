@@ -1,6 +1,7 @@
 class Message < ApplicationRecord
   belongs_to  :conversation
   belongs_to :receiving_profile, class_name: 'Profile', foreign_key: :recipient_profile_id
+  belongs_to :sending_profile, class_name: 'Profile', foreign_key: :sender_profile_id
 
   after_create :update_conversation_last_message_id
   before_create :set_default_attributes
@@ -23,6 +24,10 @@ class Message < ApplicationRecord
 
   def read?
     read_on.present? && recipient_msg_read == 'yes'
+  end
+
+  def human_sent_at
+    sent.strftime('%b %d, %Y')
   end
 
   private

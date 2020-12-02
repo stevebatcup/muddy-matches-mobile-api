@@ -1,9 +1,8 @@
 json.mode @mode
 
-if @profiles&.any?
-  json.profiles @profiles do |profile|
-    user = profile.user
-    json.gender profile.gender
-    json.firstname user.firstname
-  end
+json.profiles @profiles do |profile|
+  json.profile_id profile.id
+  json.gender profile.gender
+  json.displayName profile.text_display_name
+  json.photo photo_url(profile.main_photo, is_thumbnail: true)
 end
