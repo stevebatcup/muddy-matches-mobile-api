@@ -61,7 +61,17 @@ class Profile < ApplicationRecord
     end
 
     def build_default(params)
-      new(dating_looking_for: params[:dating_looking_for], gender: params[:gender], dating: 'yes')
+      new(dating_looking_for: params[:dating_looking_for],
+          gender:             params[:gender],
+          dating:             'yes',
+          profile_id:         default_id)
+    end
+
+    def default_id
+      begin
+        random_id = rand(40_000_000..49_999_999)
+      end while find_by(profile_id: random_id)
+      random_id
     end
 
     def approved

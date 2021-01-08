@@ -21,10 +21,18 @@ class SessionsController < ApplicationController
 
   def sign_in_success(user)
     session[:user_id] = user.id
-    render json: { status: :success, user: { firstname: user.firstname } }
+    render json: {
+      status: :success,
+      user:   {
+        id:        user.id,
+        firstName: user.firstname,
+        lastName:  user.lastname,
+        email:     user.email
+      }
+    }
   end
 
   def sign_in_fail
-    render json: { status: :fail }, status: 403
+    render json: { status: :fail, error: 'Invalid email or password' }, status: 403
   end
 end

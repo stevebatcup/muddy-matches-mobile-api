@@ -48,6 +48,8 @@ en:
       no_subscription: You must be a subscriber to send a message
       no_recipient: That member does not exist
       no_message: That message does not exist
+  profiles:
+    not_found: That profile does not exist
   activerecord:
     user:
       errors:

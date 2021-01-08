@@ -1,11 +1,13 @@
 class User < ApplicationRecord
   validates_presence_of :firstname, :lastname, :password, :email
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates_uniqueness_of :email
 
   belongs_to :profile
   has_many :connect_decisions
 
   before_create :set_default_values
+  after_create :set_extra_user_id
   validate :check_email_blacklist
   validate :check_email_wronglist
 
@@ -46,7 +48,10 @@ class User < ApplicationRecord
   def to_json_data
     {
       id:         id,
-      profile_id: profile_id
+      profile_id: profile_id,
+      firstName:  firstname,
+      lastName:   lastname,
+      email:      email
     }
   end
 
@@ -103,6 +108,10 @@ class User < ApplicationRecord
   def set_default_values
     self.last_active = Time.now
     set_auth_token
+  end
+
+  def set_extra_user_id
+    update_attribute(:user_id, id)
   end
 
   def encrypt_password(pword)

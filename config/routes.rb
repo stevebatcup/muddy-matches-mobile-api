@@ -16,4 +16,6 @@ Rails.application.routes.draw do
   post 'connect', to: 'search#index'
   post 'approve-connect', to: 'connects#create', as: :approve_connect, mode: :approve
   post 'reject-connect', to: 'connects#create', as: :reject_connect, mode: :reject
+
+  get 'profiles/:id', to: 'profiles#show', as: :profile
 end

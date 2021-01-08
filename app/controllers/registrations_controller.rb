@@ -7,11 +7,11 @@ class RegistrationsController < ApplicationController
 
     if profile.save
       UserEvent.log_registration(profile)
-      render json: { user: profile.user.to_json_data, profile: profile.to_json_data }
+      render json: { status: :success, user: profile.user.to_json_data, profile: profile.to_json_data }
     else
       UserEvent.log_registration_form_error(profile.errors.to_hash)
       error_messages = profile.user.errors.any? ? profile.user.errors.full_messages : profile.errors.full_messages
-      render json: { errors: error_messages }
+      render json: { status: :fail, error: error_messages }
     end
   end
 
